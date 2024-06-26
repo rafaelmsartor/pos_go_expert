@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 const brasilAPI = "https://brasilapi.com.br/api/cep/v1/%s"
@@ -23,6 +24,7 @@ func main() {
 	go makeRequest(brasilAPI, cep, first_channel)
 	go makeRequest(viacepAPI, cep, second_channel)
 
+	timeout := time.After(1 * time.Second)
 	// wait for the responses
 	select {
 	case res := <-first_channel:
@@ -31,6 +33,8 @@ func main() {
 	case res := <-second_channel:
 		fmt.Println("Received the response from ViaCEP first")
 		fmt.Println(res)
+	case <-timeout:
+		fmt.Println("Timeout reached")
 	}
 }
 
